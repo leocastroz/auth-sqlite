@@ -1,24 +1,34 @@
-# fly.toml
-app = "auth-sqlite"
+# fly.toml app configuration file generated for auth-sqlite on 2024-12-27T15:31:45-03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'auth-sqlite'
+primary_region = 'gru'
 
 [build]
-  builder = "paketobuildpacks/builder:base"
+  builder = 'paketobuildpacks/builder:base'
 
 [env]
-  PORT = "3000"
+  PORT = '3000'
+
+[[mounts]]
+  source = 'data_volume'
+  destination = '/data'
 
 [[services]]
-internal_port = 3000
-protocol = "tcp"
+  protocol = 'tcp'
+  internal_port = 3000
 
   [[services.ports]]
-  handlers = ["http"]
-  port = "80"
+    port = 80
+    handlers = ['http']
 
   [[services.ports]]
-  handlers = ["tls", "http"]
-  port = "443"
+    port = 443
+    handlers = ['tls', 'http']
 
-[mounts]
-  source="data_volume"
-  destination="/data"
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
