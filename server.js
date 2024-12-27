@@ -29,14 +29,20 @@ app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
     db.get('SELECT * FROM users WHERE username = ?', [username], (err, user) => {
-        if (err) return res.status(500).send('Erro no servidor.');
-        if (!user) return res.status(404).send('Usuário não encontrado.');
+        if (err) {
+            return res.status(500).send({ status: 500, message: 'Erro no servidor.' });
+        }
+        if (!user) {
+            return res.status(404).send({ status: 404, message: 'Usuário não encontrado.' });
+        }
 
         const passwordIsValid = bcrypt.compareSync(password, user.password);
-        if (!passwordIsValid) return res.status(401).send('Senha inválida.');
+        if (!passwordIsValid) {
+            return res.status(401).send({ status: 401, message: 'Senha inválida.' });
+        }
 
         const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: 86400 });
-        res.status(200).send({ auth: true, token });
+        res.status(200).send({ status: 200, auth: true, token });
     });
 });
 
