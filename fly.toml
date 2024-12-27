@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for auth-sqlite-restless-dawn-1979 on 2024-12-27T16:42:26-03:00
+# fly.toml app configuration file generated for auth-sqlite on 2024-12-27T16:48:32-03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'auth-sqlite-restless-dawn-1979'
+app = 'auth-sqlite'
 primary_region = 'gru'
 
 [build]
