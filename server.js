@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const cors = require('cors'); // Importando o pacote cors
 const db = require('./database');
 
 const app = express();
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 7000;
 const SECRET_KEY = 'your_secret_key';
 
 app.use(bodyParser.json());
+app.use(cors()); // Usando o middleware cors
 
 // Registro de usuário
 app.post('/register', (req, res) => {
