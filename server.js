@@ -1,13 +1,24 @@
-// server.js
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const cors = require('cors'); // Adicione esta linha
 const db = require('./database');
 
 const app = express();
-const PORT = process.env.PORT || 7000;
-const SECRET_KEY = 'your_secret_key';
+const PORT = process.env.PORT || 3000;
+const SECRET_KEY = process.env.SECRET_KEY;
+
+// Use o middleware cors
+const corsOptions = {
+    origin: 'https://auth-sqlite.fly.dev', // Substitua pelo seu domínio
+    optionsSuccessStatus: 200 // Algumas versões mais antigas de navegadores (IE11, alguns SmartTVs) requerem este status
+};
+
+app.use(cors(corsOptions));
+
+// app.use(cors()); // Adicione esta linha
 
 app.use(bodyParser.json());
 
