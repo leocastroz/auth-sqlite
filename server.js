@@ -7,7 +7,7 @@ const cors = require('cors'); // Importando o pacote cors
 const db = require('./database');
 
 const app = express();
-const PORT = process.env.PORT || 7000;
+const PORT = process.env.PORT || 3000;
 const SECRET_KEY = 'your_secret_key';
 
 app.use(bodyParser.json());
@@ -17,8 +17,9 @@ app.use(cors()); // Usando o middleware cors
 app.post('/register', (req, res) => {
     const { username, password } = req.body;
     const hashedPassword = bcrypt.hashSync(password, 8);
+    const userId = Math.random().toString(36).substr(2, 9);
 
-    db.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], function (err) {
+    db.run('INSERT INTO users (userId, username, password) VALUES (?, ?, ?)', [userId, username, hashedPassword], function (err) {
         if (err) return res.status(500).send('Erro ao registrar usuário.');
         res.status(201).send('Usuário registrado com sucesso!');
     });
@@ -41,8 +42,8 @@ app.post('/login', (req, res) => {
             return res.status(401).send({ status: 401, message: 'Senha inválida.' });
         }
 
-        const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: 86400 });
-        res.status(200).send({ status: 200, auth: true, token });
+        const token = jwt.sign({ id: user.id, userId: user.userId }, SECRET_KEY, { expiresIn: 86400 });
+        res.status(200).send({ status: 200, auth: true, token: token, userId: user.userId });
     });
 });
 
@@ -62,15 +63,22 @@ function verifyToken(req, res, next) {
 app.post('/products', verifyToken, (req, res) => {
     const { name, value } = req.body;
 
-    db.run('INSERT INTO products (name, value) VALUES (?, ?)', [name, value], function (err) {
+    const userId = req.userId;
+    if (!userId) {
+        return res.status(400).send('User ID não fornecido.');
+    }
+
+    db.run('INSERT INTO products (name, value, user_id) VALUES (?, ?, ?)', [name, value, userId], function (err) {
         if (err) return res.status(500).send('Erro ao cadastrar produto.');
         res.status(201).send('Produto cadastrado com sucesso!');
     });
 });
 
-// Rota para listar todos os produtos
+// Rota para listar todos os produtos de um usuário
 app.get('/products', verifyToken, (req, res) => {
-    db.all('SELECT * FROM products', [], (err, rows) => {
+    const userId = req.userId;
+
+    db.all('SELECT * FROM products WHERE user_id = ?', [userId], (err, rows) => {
         if (err) {
             return res.status(500).send('Erro ao buscar produtos.');
         }

@@ -23,6 +23,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userId TEXT UNIQUE,
         username TEXT UNIQUE,
         password TEXT
     )`);
@@ -30,7 +31,9 @@ db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
-        value REAL
+        value REAL,
+        user_id INTEGER,
+        FOREIGN KEY (user_id) REFERENCES users(id)
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS dispatches (
