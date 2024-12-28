@@ -1,9 +1,8 @@
-// server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const cors = require('cors'); // Importando o pacote cors
+const cors = require('cors');
 const db = require('./database');
 
 const app = express();
@@ -11,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 const SECRET_KEY = 'your_secret_key';
 
 app.use(bodyParser.json());
-app.use(cors()); // Usando o middleware cors
+app.use(cors());
 
 // Registro de usuário
 app.post('/register', (req, res) => {
@@ -20,8 +19,8 @@ app.post('/register', (req, res) => {
     const userId = Math.random().toString(36).substr(2, 9);
 
     db.run('INSERT INTO users (userId, username, password) VALUES (?, ?, ?)', [userId, username, hashedPassword], function (err) {
-        if (err) return res.status(500).send('Erro ao registrar usuário.');
-        res.status(201).send('Usuário registrado com sucesso!');
+        if (err) return res.status(500).send({ status: 500, message: 'Erro ao registrar usuário.' });
+        res.status(201).send({ status: 201, message: 'Usuário registrado com sucesso!', userId });
     });
 });
 
@@ -54,7 +53,7 @@ function verifyToken(req, res, next) {
 
     jwt.verify(token, SECRET_KEY, (err, decoded) => {
         if (err) return res.status(500).send('Falha ao autenticar token.');
-        req.userId = decoded.id;
+        req.userId = decoded.userId;
         next();
     });
 }
@@ -83,6 +82,40 @@ app.get('/products', verifyToken, (req, res) => {
             return res.status(500).send('Erro ao buscar produtos.');
         }
         res.status(200).json(rows);
+    });
+});
+
+// Cadastro de perfil de usuário
+app.post('/profile', verifyToken, (req, res) => {
+    const { base_img, age, nickname } = req.body;
+    const userId = req.userId;
+
+    db.run('INSERT INTO profileUser (base_img, age, nickname, user_id) VALUES (?, ?, ?, ?)', [base_img, age, nickname, userId], function (err) {
+        if (err) return res.status(500).send('Erro ao cadastrar perfil de usuário.');
+        res.status(201).send('Perfil de usuário cadastrado com sucesso!');
+    });
+});
+
+// Rota para obter o perfil de usuário
+app.get('/profile', verifyToken, (req, res) => {
+    const userId = req.userId;
+
+    db.get('SELECT * FROM profileUser WHERE user_id = ?', [userId], (err, row) => {
+        if (err) {
+            return res.status(500).send('Erro ao buscar perfil de usuário.');
+        }
+        res.status(200).json(row);
+    });
+});
+
+// Rota para editar o perfil de usuário
+app.put('/profile', verifyToken, (req, res) => {
+    const { base_img, age, nickname } = req.body;
+    const userId = req.userId;
+
+    db.run('UPDATE profileUser SET base_img = ?, age = ?, nickname = ? WHERE user_id = ?', [base_img, age, nickname, userId], function (err) {
+        if (err) return res.status(500).send('Erro ao atualizar perfil de usuário.');
+        res.status(200).send('Perfil de usuário atualizado com sucesso!');
     });
 });
 

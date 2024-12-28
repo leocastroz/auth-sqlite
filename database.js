@@ -41,6 +41,15 @@ db.serialize(() => {
         product_id INTEGER,
         FOREIGN KEY (product_id) REFERENCES products(id)
     )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS profileUser (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        base_img TEXT,
+        age INTEGER,
+        nickname TEXT,
+        user_id INTEGER,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    )`);
 });
 
 module.exports = db;
