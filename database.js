@@ -1,10 +1,24 @@
-// database.js
+const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// Use '/data/database.db' to store the SQLite file in the persistent volume
-const dbPath = path.resolve('/data/database.db');
-const db = new sqlite3.Database(dbPath);
+// Use '/data' no Fly.io e 'data' localmente
+const isFlyIo = process.env.FLY_IO === 'true';
+const dataDir = isFlyIo ? '/data' : path.resolve(__dirname, 'data');
+const dbPath = path.join(dataDir, 'database.db');
+
+// Verificar se o diretório existe, caso contrário, criá-lo
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+}
+
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error('Erro ao abrir o banco de dados:', err.message);
+    } else {
+        console.log('Banco de dados conectado com sucesso.');
+    }
+});
 
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
