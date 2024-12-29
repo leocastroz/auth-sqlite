@@ -14,11 +14,11 @@ app.use(cors());
 
 // Registro de usuário
 app.post('/register', (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, baseImg, nickname } = req.body;
     const hashedPassword = bcrypt.hashSync(password, 8);
     const userId = Math.random().toString(36).substr(2, 9);
 
-    db.run('INSERT INTO users (userId, username, password) VALUES (?, ?, ?)', [userId, username, hashedPassword], function (err) {
+    db.run('INSERT INTO users (userId, username, password, baseImg, nickname) VALUES (?, ?, ?, ?, ?)', [userId, username, hashedPassword, baseImg, nickname], function (err) {
         if (err) return res.status(500).send({ status: 500, message: 'Erro ao registrar usuário.' });
         res.status(201).send({ status: 201, message: 'Usuário registrado com sucesso!', userId });
     });
@@ -42,7 +42,7 @@ app.post('/login', (req, res) => {
         }
 
         const token = jwt.sign({ id: user.id, userId: user.userId }, SECRET_KEY, { expiresIn: 86400 });
-        res.status(200).send({ status: 200, auth: true, token: token, userId: user.userId });
+        res.status(200).send({ status: 200, auth: true, token: token, userId: user.userId, username: user.username, baseImg: user.baseImg, nickname: user.nickname });
     });
 });
 
@@ -119,6 +119,17 @@ app.put('/profile', verifyToken, (req, res) => {
     });
 });
 
+// Rota para editar os dados do usuário
+app.put('/users', verifyToken, (req, res) => {
+    const { baseImg, nickname } = req.body;
+    const userId = req.userId;
+
+    db.run('UPDATE users SET baseImg = ?, nickname = ? WHERE userId = ?', [baseImg, nickname, userId], function (err) {
+        if (err) return res.status(500).send(err);
+        res.status(200).send('Dados do usuário atualizados com sucesso!');
+    });
+});
+
 // Cadastro de despacho
 app.post('/dispatches', verifyToken, (req, res) => {
     const { product_id } = req.body;
@@ -138,6 +149,28 @@ app.delete('/products/:id', verifyToken, (req, res) => {
         if (err) return res.status(500).send('Erro ao deletar produto.');
         if (this.changes === 0) return res.status(404).send('Produto não encontrado ou não pertence ao usuário.');
         res.status(200).send('Produto deletado com sucesso!');
+    });
+});
+
+// Rota para listar todos os usuários
+app.get('/users', (req, res) => {
+    db.all('SELECT * FROM users', [], (err, rows) => {
+        if (err) {
+            return res.status(500).send('Erro ao buscar usuários.');
+        }
+        res.status(200).json(rows);
+    });
+});
+
+// Rota para obter os dados do usuário logado
+app.get('/user', verifyToken, (req, res) => {
+    const userId = req.userId;
+
+    db.get('SELECT * FROM users WHERE userId = ?', [userId], (err, row) => {
+        if (err) {
+            return res.status(500).send('Erro ao buscar dados do usuário.');
+        }
+        res.status(200).json(row);
     });
 });
 

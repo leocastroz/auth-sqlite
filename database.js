@@ -25,7 +25,9 @@ db.serialize(() => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         userId TEXT UNIQUE,
         username TEXT UNIQUE,
-        password TEXT
+        password TEXT,
+        baseImg TEXT DEFAULT NULL,
+        nickname TEXT DEFAULT NULL
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS products (
