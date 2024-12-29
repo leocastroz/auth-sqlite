@@ -129,6 +129,18 @@ app.post('/dispatches', verifyToken, (req, res) => {
     });
 });
 
+// Rota para deletar um produto baseado no seu ID
+app.delete('/products/:id', verifyToken, (req, res) => {
+    const productId = req.params.id;
+    const userId = req.userId;
+
+    db.run('DELETE FROM products WHERE id = ? AND user_id = ?', [productId, userId], function (err) {
+        if (err) return res.status(500).send('Erro ao deletar produto.');
+        if (this.changes === 0) return res.status(404).send('Produto não encontrado ou não pertence ao usuário.');
+        res.status(200).send('Produto deletado com sucesso!');
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });

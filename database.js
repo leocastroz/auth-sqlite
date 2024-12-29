@@ -33,13 +33,13 @@ db.serialize(() => {
         name TEXT,
         value REAL,
         user_id INTEGER,
-        FOREIGN KEY (user_id) REFERENCES users(id)
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS dispatches (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         product_id INTEGER,
-        FOREIGN KEY (product_id) REFERENCES products(id)
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS profileUser (
@@ -48,7 +48,7 @@ db.serialize(() => {
         age INTEGER,
         nickname TEXT,
         user_id INTEGER,
-        FOREIGN KEY (user_id) REFERENCES users(id)
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )`);
 });
 
