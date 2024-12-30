@@ -27,7 +27,8 @@ db.serialize(() => {
         username TEXT UNIQUE,
         password TEXT,
         baseImg TEXT DEFAULT NULL,
-        nickname TEXT DEFAULT NULL
+        nickname TEXT DEFAULT NULL,
+        role TEXT
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS products (
