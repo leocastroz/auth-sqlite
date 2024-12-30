@@ -174,6 +174,27 @@ app.get('/user', verifyToken, (req, res) => {
     });
 });
 
+// Rota para resetar a senha do usuário
+app.put('/reset-password', (req, res) => {
+    const { username, newPassword } = req.body;
+
+    db.get('SELECT * FROM users WHERE username = ?', [username], (err, user) => {
+        if (err) {
+            return res.status(500).send({ status: 500, message: 'Erro no servidor.' });
+        }
+        if (!user) {
+            return res.status(404).send({ status: 404, message: 'Usuário não encontrado.' });
+        }
+
+        const hashedPassword = bcrypt.hashSync(newPassword, 8);
+
+        db.run('UPDATE users SET password = ? WHERE username = ?', [hashedPassword, username], function (err) {
+            if (err) return res.status(500).send({ status: 500, message: 'Erro ao atualizar senha.' });
+            res.status(200).send({ status: 200, message: 'Senha atualizada com sucesso!' });
+        });
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
